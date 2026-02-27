@@ -1,0 +1,155 @@
+#!/bin/bash
+# install unzip tool
+sudo apt update
+sudo apt install -y curl wget unzip git
+
+# install kops
+curl -LO "https://dl.k8s.io/release/v1.26.3/bin/linux/amd64/kubectl"
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+kubectl version --client
+
+# install kubectl
+curl -LO https://dl.k8s.io/release/$(curl -LO -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+# install aws cli and configure with access keys
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+#create iam user role with admin access
+
+
+# create access keys for the user
+
+
+#configure aws 
+aws configure
+ Enter:
+
+    Access Key
+
+    Secret Key
+
+    Region (example: ap-south-1)
+
+    Output format: json
+ 
+ 
+# create the s3 bucket and should enable versioning
+
+# create ssh for node authentication  // ssh-keygen
+  ssh-keygen
+  Press enter → default location.
+
+# Export state:
+  export NAME=andrews.k8s.local
+  export KOPS_STATE_STORE=s3://my-kops-cluster-state-andrews  
+
+
+# create the cluster with kops command // kops create cluster --zones eu-north-1 ${NAME}
+
+kops create cluster \
+--name=andrews.k8s.local \
+--state=s3://my-kops-cluster-state-andrews \
+--zones=ap-south-1a \
+--node-count=1 \
+--node-size=t3.small \
+--control-plane-size=t3.small \
+--control-plane-count=1 \
+--yes
+
+kOps has set your kubectl context to andrews.k8s.local
+
+Cluster is starting.  It should be ready in a few minutes.
+
+Suggestions:
+ * validate cluster: kops validate cluster --wait 10m
+ * list nodes: kubectl get nodes --show-labels
+ * ssh to a control-plane node: ssh -i ~/.ssh/id_rsa ubuntu@
+ * the ubuntu user is specific to Ubuntu. If not using Ubuntu please use the appropriate user based on your OS.
+ * read about installing addons at: https://kops.sigs.k8s.io/addons.
+
+
+ # validate your cluster kops validate cluster
+   
+  kops validate cluster --wait 10m
+
+   kops validate cluster --name andrews.k8s.local --state=s3://my-kops-cluster-state-andrews
+
+
+ kops delete cluster --name=andrews.k8s.local --state=s3://my-kops-cluster-state-andrews --yes
+
+
+
+ access key ==>> AKIARUKVBRSLAHNRR44Q
+ secret key ==>> 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
+
+
+
+
+
+ ✅ Full Clean Flow (Correct Order)
+
+Install awscli, kubectl, kops
+
+Create IAM user (AdministratorAccess)
+
+Create Access Keys
+
+aws configure
+
+Create S3 bucket + enable versioning
+
+Export state:
+
+export NAME=andrews.k8s.local
+export KOPS_STATE_STORE=s3://my-kops-cluster-state-andrews
+
+Create cluster (mention node count here)
+
+Update cluster
+
+Validate cluster
+
+
+after run that cluster creation command it will create these resources:
+
+  📊 Approximate Total Resources Created
+
+| Resource Type        | Approx Count |
+| -------------------- | ------------ |
+| EC2                  | 3            |
+| EBS                  | 3            |
+| Load Balancer        | 1            |
+| Auto Scaling Groups  | 2            |
+| IAM Roles + Profiles | 4–6          |
+| VPC + Networking     | 5–10         |
+| S3 Bucket            | 1            |
+
+
+
+
+Breaking down your FQDN:
+backend-service: The name you gave your service in your backend.yaml file.
+
+default: The Namespace. Since you didn't specify a different namespace in your metadata, Kubernetes automatically put it in the "default" one.
+
+svc: Short for "service," indicating this is a Service resource.
+
+cluster.local: The default domain name for the entire cluster.
+
+Why this is useful for you:
+Since you are a Golang developer moving into DevOps, understanding this is key for microservices:
+
+Communication within the same Namespace: If your frontend pod and backend pod are both in the default namespace, the frontend can simply use http://backend-service:9000. Kubernetes is smart enough to fill in the rest.
+
+Communication across Namespaces: If you later move your database to a namespace called database-ns, your backend would need to call it using mysql-service.database-ns.svc.cluster.local.
+
+Isolation: Namespaces allow you to have a "Production" and "Development" environment in the same cluster without their services getting mixed up.
+
+
+
+scp -i Downloads/mumba-region-key.pem -r ./k8s/ ubuntu@13.201.38.197:/home/ubuntu/
