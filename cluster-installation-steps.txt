@@ -84,8 +84,8 @@ Suggestions:
 
 
 
- access key ==>> AKIARUKVBRSLAHNRR44Q
- secret key ==>> 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
+ access key ==>> 
+ secret key ==>> 
 
 
 
